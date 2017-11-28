@@ -16,10 +16,10 @@ public:
 	void display(bool there_is_a_light); //will display both description and any objects in room 
 	bool isDark(void);
 };
-Room::Room(string description, bool isdark)
+Room::Room(string description, bool isdark) //Constructor for Room
 {
 	this->description = description;
-	this->isDark = isdark;
+	this->isdark = isdark;
 }
 void Room::display(bool there_is_a_light)
 {
@@ -30,6 +30,7 @@ bool Room::isDark(void)
 {
 	return isdark;
 }
+
 class Maze
 {
 private:
@@ -70,7 +71,7 @@ bool Maze::loadDescriptionsFromFile(void)
 }
 void Maze::displayAllRooms(void)//Testing purposes
 {
-	for (int roomcount = 0; roomcount < Contents.size(); roomcount++){ Contents[roomcount].display(true); }
+	for (int roomcount = 0; roomcount < int(Contents.size()); roomcount++){ Contents[roomcount].display(true); }
 }
 class Adventurer
 {
@@ -86,3 +87,10 @@ private:
 	Maze CurrentMaze;
 public:
 };
+int main(void)
+{
+	Maze MyMaze;
+	MyMaze.loadDescriptionsFromFile();
+	MyMaze.displayAllRooms();
+	return 0;
+}
