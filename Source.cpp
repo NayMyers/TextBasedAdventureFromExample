@@ -57,7 +57,7 @@ bool Maze::loadDescriptionsFromFile(void)
 	string roomdetails;
 	string isdark;
 
-	inputfile.open(MAZEDESCRIPTIONS);
+	inputfile.open(MAZEDESCRIPTIONS);//*****OOOOO
 
 	if (!inputfile)
 	{
@@ -75,7 +75,7 @@ bool Maze::loadDescriptionsFromFile(void)
 		roomcount++;
 	}
 
-	inputfile.close();
+	inputfile.close();//*****CCCCC
 
 	return true;
 }
@@ -97,6 +97,43 @@ private:
 	Maze CurrentMaze;
 public:
 };
+bool Maze::loadConnectionsFromFile(void)
+{
+	ifstream inputfile;
+	int leadsto = NODOOR;
+	string locked, keyrequired;
+	int roomnumber = 0;
+	int direction = 0;
+	string metacharacter;
+
+	inputfile.open(MAZECONNECTIONS); //*****OOOOO
+
+	if (!inputfile)
+	{
+		cout << "Maze connections file does not exist" << endl;
+		return false;
+	}
+	Connections.clear(); //clear out old data 
+
+	while (inputfile >> leadsto)
+	{
+		if (direction == 0){ Connections.push_back(Connection()); }//new connection to record
+		inputfile >> locked;
+		inputfile.ignore(); //clear metacharacter
+		getline(inputfile, keyrequired);//could be 
+		if (locked == "TRUE"){ Connections[roomnumber].Direction.push_back(Door(leadsto, true, keyrequired)); }
+		else { Connections[roomnumber].Direction.push_back(Door(leadsto, false, keyrequired)); }
+		direction++;
+		if (direction >= NUMBEROFDOORS)
+		{
+			roomnumber++;
+			direction = 0;
+		}
+	}
+	
+	inputfile.close(); //*****CCCCC
+	return true;
+}
 
 class Door
 {
