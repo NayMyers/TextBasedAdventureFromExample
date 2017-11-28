@@ -13,6 +13,24 @@ enum direction {NORTH,SOUTH,EAST,WEST,OUT};
 const vector<string> directions = { "NORTH", "SOUTH", "EAST", "WEST", "OUT" };
 const vector<string> shorthandDirections = { "N", "S", "E", "W", "O" };
 
+class Door
+{
+private:
+	int _leadsto = NODOOR; //an int value indicating room number door leads to 
+	bool _locked = false; //indicates whether door is locked 
+	string _keyrequired = ""; //name of key required to open door if locked 
+public:
+	Door(int leadsto, bool locked, string keyrequired);
+	int leadsto(void);
+	bool locked(void);
+	void unlockDoor(string key);
+};
+class Connection
+{
+public:
+	vector<Door> Direction;
+	//least knowledge does not apply because connection only being used to organise 2d vector 
+};
 class Room
 {
 private:
@@ -135,18 +153,6 @@ bool Maze::loadConnectionsFromFile(void)
 	return true;
 }
 
-class Door
-{
-private:
-	int _leadsto = NODOOR; //an int value indicating room number door leads to 
-	bool _locked = false; //indicates whether door is locked 
-	string _keyrequired = ""; //name of key required to open door if locked 
-public:
-	Door(int leadsto, bool locked, string keyrequired);
-	int leadsto(void);
-	bool locked(void);
-	void unlockDoor(string key);
-};
 Door::Door(int leadsto, bool locked, string keyrequired)
 {
 	_leadsto = leadsto;
@@ -178,17 +184,14 @@ void Door::unlockDoor(string key)
 
 	cout << "you do not have the right key! The door remains locked!" << endl;
 }
-class Connection
-{
-public:
-	vector<Door> Direction;
-	//least knowledge does not apply because connection only being used to organise 2d vector 
-};
 
 int main(void)
 {
 	Maze MyMaze;
 	MyMaze.loadDescriptionsFromFile();
 	MyMaze.displayAllRooms();
+	MyMaze.loadConnectionsFromFile();
+	MyMaze.displayAllConnections();
+
 	return 0;
 }
