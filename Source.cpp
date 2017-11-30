@@ -9,9 +9,54 @@ using namespace std;
 #define NODOOR -1
 #define NUMBEROFDOORS 5
 
-enum direction {NORTH,SOUTH,EAST,WEST,OUT};
+enum direction { NORTH, SOUTH, EAST, WEST, OUT };
 const vector<string> directions = { "NORTH", "SOUTH", "EAST", "WEST", "OUT" };
 const vector<string> shorthandDirections = { "N", "S", "E", "W", "O" };
+
+class Object
+{
+private:
+	string _description = "";
+	string _hiddendescription = "";
+	bool _liftable = false; // true = can be picked up
+	bool _lightable = false; // true = can be lit
+	bool _visible = false; // true can be seen 
+	int _weapon = 0; // value for weapon other than 0 indicates item is a weapon and its damage
+public:
+	Object(string description, string hiddendescription,
+		bool liftable, bool lightable, bool visible, int weapon);
+	string description(void);
+	string hiddendescription(void);
+	bool liftable(void);
+	bool lightable(void);
+	bool visible(void);
+	int weapon(void);
+	void setVisible(bool visibility);
+};  
+Object::Object(string description, string hiddendescription,
+	bool liftable, bool lightable, bool visible, int weapon)
+{
+	_description = description;
+	_hiddendescription = hiddendescription;
+	_liftable = liftable;
+	_lightable = lightable;
+	_visible = visible;
+	_weapon = weapon;
+}
+//----------------OBJECT GETTERS
+string Object::description(void){ return _description; }
+string Object::hiddendescription(void){ return _hiddendescription; }
+bool Object::liftable(void){ return _liftable; }
+bool Object::lightable(void){ return _lightable; }
+bool Object::visible(void){ return _visible; }
+int Object::weapon(void){ return _weapon; }
+//---------------------
+//---------------------OBJECT SETTERS
+void Object::setVisible(bool visibility)
+{
+	_visible = visibility;
+}
+//-----------------------
 
 class Door
 {
@@ -36,10 +81,13 @@ class Room
 private:
 	string description = "";
 	bool isdark = false;
+	vector<Object> Inventory;
 public:
-	Room(string description,bool isdark);
+	Room(string description, bool isdark);
 	void display(bool there_is_a_light); //will display both description and any objects in room 
 	bool isDark(void);
+	void addItem(Object NewObject);
+	Object removeItem(string description);
 };
 Room::Room(string description, bool isdark) //Constructor for Room
 {
@@ -97,6 +145,17 @@ bool Maze::loadDescriptionsFromFile(void)
 
 	return true;
 }
+void Maze::displayAllConnections(void)
+{
+	for (int roomcount = 0; roomcount < Connections.size(); roomcount++)
+	{
+		cout << "Room number " << roomcount << " is connected to rooms:" << endl;
+		for (int direction = 0; direction < NUMBEROFDOORS; direction++)
+		{
+			cout << directions[direction] << ": " << Connections[roomcount].Direction[direction].leadsto() << endl;
+		}
+	}
+}
 void Maze::displayAllRooms(void)//Testing purposes
 {
 	for (int roomcount = 0; roomcount < int(Contents.size()); roomcount++){ Contents[roomcount].display(true); }
@@ -148,7 +207,7 @@ bool Maze::loadConnectionsFromFile(void)
 			direction = 0;
 		}
 	}
-	
+
 	inputfile.close(); //*****CCCCC
 	return true;
 }
