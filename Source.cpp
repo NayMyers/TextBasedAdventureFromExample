@@ -8,6 +8,7 @@ using namespace std;
 #define MAZECONNECTIONS "maze_connections.txt"
 #define NODOOR -1
 #define NUMBEROFDOORS 5
+#define ROOMOBJECTS "room_objects.txt"
 
 enum direction { NORTH, SOUTH, EAST, WEST, OUT };
 const vector<string> directions = { "NORTH", "SOUTH", "EAST", "WEST", "OUT" };
@@ -151,6 +152,7 @@ public:
 	void displayAllConnections(void); //for testing purposes only
 	bool loadDescriptionsFromFile(void); //load in the room descriptions
 	bool loadConnectionsFromFile(void); //load room connections
+	bool loadObjectsFromFile(void); //load objects
 };
 
 bool Maze::loadDescriptionsFromFile(void)
@@ -181,6 +183,52 @@ bool Maze::loadDescriptionsFromFile(void)
 	inputfile.close();//*****CCCCC
 
 	return true;
+}
+bool Maze::loadObjectsFromFile(void)
+{
+	ifstream inputfile;
+	string text, metacharacter, description = "", hiddendescription = "";
+	bool liftable = false, lightable = false, visible = false;
+	int weapon = 0, roomnumber;
+
+	inputfile.open(ROOMOBJECTS); //*****OOOOO
+
+	if (!inputfile)
+	{
+		cout << "Object file does not exist" << endl;
+		return false;
+	}
+
+	while (inputfile >> roomnumber)
+	{
+		if (roomnumber < 0 || roomnumber >= Contents.size())
+		{
+			cout << "Illegal room number in object file" << endl;
+			return false;
+		}
+		getline(inputfile, metacharacter); //LF
+		getline(inputfile, description);
+		getline(inputfile, hiddendescription);
+
+		inputfile >> text;
+		if (text == "TRUE") liftable = true; 
+		else liftable = false;
+
+		inputfile >> text;
+		if (text == "TRUE") lightable = true;
+		else lightable = false;
+
+		inputfile >> text;
+		if (text == "TRUE") visible = true;
+		else visible = false;
+
+		inputfile >> weapon;
+
+		Contents[roomnumber].addItem(Object(description, hiddendescription, liftable, lightable, visible, weapon));
+
+		inputfile.close(); //****CCCCC
+	
+	}
 }
 void Maze::displayAllConnections(void)
 {
@@ -285,10 +333,11 @@ int main(void)
 {
 	Maze MyMaze;
 	
+	MyMaze.loadObjectsFromFile();
 	MyMaze.loadDescriptionsFromFile();
 	MyMaze.displayAllRooms();
 	MyMaze.loadConnectionsFromFile();
 	MyMaze.displayAllConnections();
-
+	
 	return 0;
 }
