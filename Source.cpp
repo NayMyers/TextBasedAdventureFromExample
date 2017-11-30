@@ -43,6 +43,7 @@ Object::Object(string description, string hiddendescription,
 	_visible = visible;
 	_weapon = weapon;
 }
+
 //----------------OBJECT GETTERS
 string Object::description(void){ return _description; }
 string Object::hiddendescription(void){ return _hiddendescription; }
@@ -87,22 +88,58 @@ public:
 	void display(bool there_is_a_light); //will display both description and any objects in room 
 	bool isDark(void);
 	void addItem(Object NewObject);
-	Object removeItem(string description);
+	Object removeItem(string description); //REMOVES ITEM FROM ROOM AND RETURNS IT. A blank item is returned if not.
 };
 Room::Room(string description, bool isdark) //Constructor for Room
 {
 	this->description = description;
 	this->isdark = isdark;
 }
+void Room::addItem(Object NewObject)
+{
+	Inventory.push_back(NewObject);
+}
 void Room::display(bool there_is_a_light)
 {
-	if (isdark && !there_is_a_light) cout << "IT IS DARK! YOU SEE NOTHING!" << endl;
-	else cout << description << endl;
+	if (isdark && !there_is_a_light) { cout << "IT IS DARK! YOU SEE NOTHING!" << endl << endl; return; }
+
+	cout << description << endl;
+
+	cout << endl << "Room contains:" << endl;
+
+	if (Inventory.size() == 0) { cout << "Nothing!" << endl << endl; }
+	else
+	{
+		for (int inventorycount = 0; inventorycount < Inventory.size(); inventorycount++)
+		{
+			if (Inventory[inventorycount].visible())
+			{
+				cout << Inventory[inventorycount].description() << endl;
+			}
+		}
+	}
+	cout << endl;
 }
 bool Room::isDark(void)
 {
 	return isdark;
 }
+Object Room::removeItem(string description)
+{
+	Object BlankObject("", "", false, false, false, 0);
+
+	for (int inventorycount = 0; inventorycount < Inventory.size(); inventorycount++)
+	{
+		if (Inventory[inventorycount].description() == description)
+		{
+			BlankObject = Inventory[inventorycount];
+			Inventory.erase(Inventory.begin() + inventorycount);
+			break;
+		}
+	}
+	return BlankObject;
+}
+
 
 class Maze
 {
@@ -247,6 +284,7 @@ void Door::unlockDoor(string key)
 int main(void)
 {
 	Maze MyMaze;
+	
 	MyMaze.loadDescriptionsFromFile();
 	MyMaze.displayAllRooms();
 	MyMaze.loadConnectionsFromFile();
