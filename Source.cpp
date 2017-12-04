@@ -91,25 +91,65 @@ public:
 	int leadsto(void);
 	bool locked(void);
 	void unlockDoor(string key);
+	int go(void);
 };
+Door::Door(int leadsto, bool locked, string keyrequired)
+{
+	_leadsto = leadsto;
+	_locked = locked;
+	_keyrequired = keyrequired;
+}
+int Door::leadsto(void)
+{
+	return _leadsto;
+}
+bool Door::locked(void)
+{
+	return _locked;
+}
+void Door::unlockDoor(string key)
+{
+	if (!_locked)
+	{
+		cout << "Door is not locked!" << endl;
+		return;
+	}
+	if (key == _keyrequired)
+	{
+		cout << "You have the right key! The door unlocks" << endl;
+		_locked = false;
+		return;
+	}
+
+	cout << "you do not have the right key! The door remains locked!" << endl;
+}
+int Door::go(void)
+{
+	if (_locked)return LOCKED;
+	return _leadsto;
+}
+
 class Connection
 {
 public:
 	vector<Door> Direction;
 	//least knowledge does not apply because connection only being used to organise 2d vector 
 };
+
 class Room
 {
 private:
 	string description = "";
 	bool isdark = false;
 	vector<Object> Inventory;
+	bool hasLight(void); //check to see if lit object in room
 public:
 	Room(string description, bool isdark);
-	void display(bool there_is_a_light); //will display both description and any objects in room 
+	bool display(bool there_is_a_light); //will display both description and any objects in room 
 	bool isDark(void);
 	void addItem(Object NewObject);
 	Object removeItem(string description); //REMOVES ITEM FROM ROOM AND RETURNS IT. A blank item is returned if not.
+	bool search(string itemsearched);//search for itemsearched in room
 };
 Room::Room(string description, bool isdark) //Constructor for Room
 {
@@ -120,18 +160,18 @@ void Room::addItem(Object NewObject)
 {
 	Inventory.push_back(NewObject);
 }
-void Room::display(bool there_is_a_light)
+bool Room::display(bool there_is_a_light)
 {
-	if (isdark && !there_is_a_light) { cout << "IT IS DARK! YOU SEE NOTHING!" << endl << endl; return; }
+	if (isdark && !there_is_a_light) { cout << "IT IS DARK! YOU SEE NOTHING!" << endl << endl; return false; }
 
 	cout << description << endl;
 
 	cout << endl << "Room contains:" << endl;
 
-	if (Inventory.size() == 0) { cout << "Nothing!" << endl << endl; }
+	if (Inventory.size() == 0) { cout << "Nothing!" << endl << endl; } // Nothing in the room
 	else
 	{
-		for (int inventorycount = 0; inventorycount < int(Inventory.size()); inventorycount++)
+		for (int inventorycount = 0; inventorycount < int(Inventory.size()); inventorycount++) //got through inventory
 		{
 			if (Inventory[inventorycount].visible())
 			{
@@ -140,14 +180,25 @@ void Room::display(bool there_is_a_light)
 		}
 	}
 	cout << endl;
+	return true;
 }
 bool Room::isDark(void)
 {
-	return isdark;
+	if (!isdark)return isdark; //room is light
+	return !hasLight();//return false if lit object is present		
+}
+bool Room::hasLight(void)
+{
+	for (int inventorycount = 0; inventorycount < Inventory.size(); inventorycount++)//search through inventory
+	{
+		if (Inventory[inventorycount].lit()) return true;
+		// there is a lit object in the room	
+	}
+	return false;
 }
 Object Room::removeItem(string description)
 {
-	Object BlankObject("", "", false, false, false, 0);
+	Object BlankObject("", "", false, false, false, 0,"");
 
 	for (int inventorycount = 0; inventorycount < int(Inventory.size()); inventorycount++)
 	{
@@ -181,7 +232,6 @@ public:
 	void unlockDoor(string direction, string key); //unlock indicated door in current room 
 	bool search(string itemsearched); //search indicated item in current room
 };
-
 void Maze::goDirection(string direction)
 {
 	//this method sets the current room to the new room indicated by the supplied direction 
@@ -346,20 +396,6 @@ bool Maze::search(string itemsearched) //More to be added elsewhere
 {
 	return Contents[currentroom].search(itemsearched);
 }
-
-class Adventurer
-{
-private:
-
-public:
-};
-class AdventureGame
-{
-private:
-	Adventurer CurrentPlayer;
-	Maze CurrentMaze;
-public:
-};
 bool Maze::loadConnectionsFromFile(void)
 {
 	ifstream inputfile;
@@ -398,37 +434,19 @@ bool Maze::loadConnectionsFromFile(void)
 	return true;
 }
 
-Door::Door(int leadsto, bool locked, string keyrequired)
+class Adventurer
 {
-	_leadsto = leadsto;
-	_locked = locked;
-	_keyrequired = keyrequired;
-}
+private:
 
-int Door::leadsto(void)
+public:
+};
+class AdventureGame
 {
-	return _leadsto;
-}
-bool Door::locked(void)
-{
-	return _locked;
-}
-void Door::unlockDoor(string key)
-{
-	if (!_locked)
-	{
-		cout << "Door is not locked!" << endl;
-		return;
-	}
-	if (key == _keyrequired)
-	{
-		cout << "You have the right key! The door unlocks" << endl;
-		_locked = false;
-		return;
-	}
-
-	cout << "you do not have the right key! The door remains locked!" << endl;
-}
+private:
+	Adventurer CurrentPlayer;
+	Maze CurrentMaze;
+public:
+};
 
 int main(void)
 {
