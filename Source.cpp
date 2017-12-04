@@ -33,7 +33,7 @@ public:
 	bool visible(void);
 	int weapon(void);
 	void setVisible(bool visibility);
-};  
+};
 Object::Object(string description, string hiddendescription,
 	bool liftable, bool lightable, bool visible, int weapon)
 {
@@ -46,12 +46,12 @@ Object::Object(string description, string hiddendescription,
 }
 
 //----------------OBJECT GETTERS
-string Object::description(void){ return _description; }
-string Object::hiddendescription(void){ return _hiddendescription; }
-bool Object::liftable(void){ return _liftable; }
-bool Object::lightable(void){ return _lightable; }
-bool Object::visible(void){ return _visible; }
-int Object::weapon(void){ return _weapon; }
+string Object::description(void) { return _description; }
+string Object::hiddendescription(void) { return _hiddendescription; }
+bool Object::liftable(void) { return _liftable; }
+bool Object::lightable(void) { return _lightable; }
+bool Object::visible(void) { return _visible; }
+int Object::weapon(void) { return _weapon; }
 //---------------------
 //---------------------OBJECT SETTERS
 void Object::setVisible(bool visibility)
@@ -189,7 +189,7 @@ bool Maze::loadObjectsFromFile(void)
 	ifstream inputfile;
 	string text, metacharacter, description = "", hiddendescription = "";
 	bool liftable = false, lightable = false, visible = false;
-	int weapon = 0, roomnumber;
+	int weapon = 0, roomnumber=0;
 
 	inputfile.open(ROOMOBJECTS); //*****OOOOO
 
@@ -211,7 +211,7 @@ bool Maze::loadObjectsFromFile(void)
 		getline(inputfile, hiddendescription);
 
 		inputfile >> text;
-		if (text == "TRUE") liftable = true; 
+		if (text == "TRUE") liftable = true;
 		else liftable = false;
 
 		inputfile >> text;
@@ -226,9 +226,8 @@ bool Maze::loadObjectsFromFile(void)
 
 		Contents[roomnumber].addItem(Object(description, hiddendescription, liftable, lightable, visible, weapon));
 
-		inputfile.close(); //****CCCCC
-	
 	}
+	inputfile.close(); //****CCCCC
 }
 void Maze::displayAllConnections(void)
 {
@@ -243,7 +242,7 @@ void Maze::displayAllConnections(void)
 }
 void Maze::displayAllRooms(void)//Testing purposes
 {
-	for (int roomcount = 0; roomcount < int(Contents.size()); roomcount++){ Contents[roomcount].display(true); }
+	for (int roomcount = 0; roomcount < int(Contents.size()); roomcount++) { Contents[roomcount].display(true); }
 }
 class Adventurer
 {
@@ -279,11 +278,11 @@ bool Maze::loadConnectionsFromFile(void)
 
 	while (inputfile >> leadsto)
 	{
-		if (direction == 0){ Connections.push_back(Connection()); }//new connection to record
+		if (direction == 0) { Connections.push_back(Connection()); }//new connection to record
 		inputfile >> locked;
 		inputfile.ignore(); //clear metacharacter
 		getline(inputfile, keyrequired);//could be 
-		if (locked == "TRUE"){ Connections[roomnumber].Direction.push_back(Door(leadsto, true, keyrequired)); }
+		if (locked == "TRUE") { Connections[roomnumber].Direction.push_back(Door(leadsto, true, keyrequired)); }
 		else { Connections[roomnumber].Direction.push_back(Door(leadsto, false, keyrequired)); }
 		direction++;
 		if (direction >= NUMBEROFDOORS)
@@ -332,12 +331,13 @@ void Door::unlockDoor(string key)
 int main(void)
 {
 	Maze MyMaze;
+
 	
-	MyMaze.loadObjectsFromFile();
 	MyMaze.loadDescriptionsFromFile();
-	MyMaze.displayAllRooms();
 	MyMaze.loadConnectionsFromFile();
+	MyMaze.loadObjectsFromFile();
+	MyMaze.displayAllRooms();
 	MyMaze.displayAllConnections();
-	
+
 	return 0;
 }
