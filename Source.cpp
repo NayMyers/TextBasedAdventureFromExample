@@ -111,7 +111,7 @@ void Room::display(bool there_is_a_light)
 	if (Inventory.size() == 0) { cout << "Nothing!" << endl << endl; }
 	else
 	{
-		for (int inventorycount = 0; inventorycount < Inventory.size(); inventorycount++)
+		for (int inventorycount = 0; inventorycount < int(Inventory.size()); inventorycount++)
 		{
 			if (Inventory[inventorycount].visible())
 			{
@@ -129,7 +129,7 @@ Object Room::removeItem(string description)
 {
 	Object BlankObject("", "", false, false, false, 0);
 
-	for (int inventorycount = 0; inventorycount < Inventory.size(); inventorycount++)
+	for (int inventorycount = 0; inventorycount < int(Inventory.size()); inventorycount++)
 	{
 		if (Inventory[inventorycount].description() == description)
 		{
@@ -201,7 +201,7 @@ bool Maze::loadObjectsFromFile(void)
 
 	while (inputfile >> roomnumber)
 	{
-		if (roomnumber < 0 || roomnumber >= Contents.size())
+		if (roomnumber < 0 || roomnumber >= int(Contents.size()))
 		{
 			cout << "Illegal room number in object file" << endl;
 			return false;
@@ -228,10 +228,11 @@ bool Maze::loadObjectsFromFile(void)
 
 	}
 	inputfile.close(); //****CCCCC
+	return true;
 }
 void Maze::displayAllConnections(void)
 {
-	for (int roomcount = 0; roomcount < Connections.size(); roomcount++)
+	for (int roomcount = 0; roomcount < int(Connections.size()); roomcount++)
 	{
 		cout << "Room number " << roomcount << " is connected to rooms:" << endl;
 		for (int direction = 0; direction < NUMBEROFDOORS; direction++)
