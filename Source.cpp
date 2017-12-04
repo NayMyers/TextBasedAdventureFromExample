@@ -9,6 +9,8 @@ using namespace std;
 #define NODOOR -1
 #define NUMBEROFDOORS 5
 #define ROOMOBJECTS "room_objects.txt"
+#define STARTINGROOM 0
+#define LOCKED -2
 
 enum direction { NORTH, SOUTH, EAST, WEST, OUT };
 const vector<string> directions = { "NORTH", "SOUTH", "EAST", "WEST", "OUT" };
@@ -22,10 +24,12 @@ private:
 	bool _liftable = false; // true = can be picked up
 	bool _lightable = false; // true = can be lit
 	bool _visible = false; // true can be seen 
+	bool _lit = false; //indicates if the object is lit
 	int _weapon = 0; // value for weapon other than 0 indicates item is a weapon and its damage
+	string _hiddenin = "";
 public:
 	Object(string description, string hiddendescription,
-		bool liftable, bool lightable, bool visible, int weapon);
+		bool liftable, bool lightable, bool visible, int weapon,string hiddenin);
 	string description(void);
 	string hiddendescription(void);
 	bool liftable(void);
@@ -33,9 +37,12 @@ public:
 	bool visible(void);
 	int weapon(void);
 	void setVisible(bool visibility);
+	bool lit(void);
+	bool light(void);
+	string hiddenin(void);
 };
 Object::Object(string description, string hiddendescription,
-	bool liftable, bool lightable, bool visible, int weapon)
+	bool liftable, bool lightable, bool visible, int weapon,string hiddenin)
 {
 	_description = description;
 	_hiddendescription = hiddendescription;
@@ -43,8 +50,8 @@ Object::Object(string description, string hiddendescription,
 	_lightable = lightable;
 	_visible = visible;
 	_weapon = weapon;
+	_hiddenin = hiddenin;
 }
-
 //----------------OBJECT GETTERS
 string Object::description(void) { return _description; }
 string Object::hiddendescription(void) { return _hiddendescription; }
@@ -52,8 +59,21 @@ bool Object::liftable(void) { return _liftable; }
 bool Object::lightable(void) { return _lightable; }
 bool Object::visible(void) { return _visible; }
 int Object::weapon(void) { return _weapon; }
+string Object::hiddenin(void) { return _hiddenin; };
+bool Object::lit(void) { return _lit; };
+bool Object::light(void)
+{
+	//returns true if object is lightable and has been lit	
+	if (!_lightable)return false;
+	_lit = true;
+	return true;
+}
 //---------------------
 //---------------------OBJECT SETTERS
+void Object::setVisible(bool visibility)
+{
+	_visible = visibility;
+}
 void Object::setVisible(bool visibility)
 {
 	_visible = visibility;
@@ -147,14 +167,50 @@ class Maze
 private:
 	vector<Room> Contents;
 	vector<Connection> Connections;
+	int currentroom = STARTINGROOM;
 public:
 	void displayAllRooms(void); //for testing purposes only
 	void displayAllConnections(void); //for testing purposes only
 	bool loadDescriptionsFromFile(void); //load in the room descriptions
 	bool loadConnectionsFromFile(void); //load room connections
 	bool loadObjectsFromFile(void); //load objects
+	void goDirection(string direction); //go in indicated direction from current room
+	void addItem(Object NewObject);//add item to inventory of current room
+	Object removeItem(string description); //removes item from room and returns it. A blank item is returned if not
+	void look(bool there_is_light);//look at current room 
+	void unlockDoor(string direction, string key); //unlock indicated door in current room 
+	bool search(string itemsearched); //search indicated item in current room
 };
 
+void Maze::goDirection(string direction)
+{
+	//this method sets the current room to the new room indicated by the supplied direction 
+	//if there is no door available or the door is locked, the current room doesn't change
+	int newroom;
+	cout << "YOU ATTEMPT TO GO" << direction << endl << endl;	
+
+	for (int directioncount = 0; directioncount < directions.size(); directioncount++)
+	{
+		if (directions[directioncount] == direction)
+		{
+			newroom = Connections[currentroom].Direction[directioncount].go(); ////////////////////////TBADDED
+			if (newroom == LOCKED)
+			{
+				cout << "The " << direction << " DOOR IS LOCKED! ";
+				newroom = NODOOR; //Nodoor because door is locked 
+			}
+			break;
+		}
+	}
+
+	if (newroom == NODOOR)cout << "YOU CANNOT GO IN THAT DIRECTION!" << endl;
+	else
+	{
+		currentroom = newroom;
+		cout << "You Go " << direction;
+	}
+	cout << endl << endl;
+}
 bool Maze::loadDescriptionsFromFile(void)
 {
 	ifstream inputfile;
@@ -245,13 +301,58 @@ void Maze::displayAllRooms(void)//Testing purposes
 {
 	for (int roomcount = 0; roomcount < int(Contents.size()); roomcount++) { Contents[roomcount].display(true); }
 }
+void Maze::addItem(Object NewObject)
+{
+	Contents[currentroom].addItem(NewObject);
+}
+Object Maze::removeItem(string desription)
+{
+	return Contents[currentroom].removeItem(desription);
+}
+void Maze::look(bool there_is_a_light) //EDITING NEED DOING	
+{
+	bool exit = false, looksuccess = false; //records if there is an exit avaiable 
+	looksuccess = Contents[currentroom].display(there_is_a_light); /////??????????????????????????????
+	if (looksuccess)
+	{
+		cout << "YOU CAN GO:" << endl << endl;	
+		for (int directioncount = 0; directioncount < directions.size(); directioncount++)
+		{
+			if (Connections[currentroom].Direction[directioncount].go() != NODOOR)
+			{
+				cout << directions[directioncount] << " "; 
+				exit = true;
+			}
+		}
+		if (!exit) cout << "NO WHERE";
+		cout << endl << endl;
+	}
+
+}
+void Maze::unlockDoor(string direction, string key)
+{
+	cout << "YOU ATTEMPT TO UNLOCK THE " << direction << " DOOR WITH THE " << key << endl << endl;
+
+	for (int directioncount = 0; directioncount < directions.size(); directioncount++)
+	{
+		if (directions[directioncount] == direction)
+		{
+			Connections[currentroom].Direction[directioncount].unlockDoor(key);
+			break;
+		}
+	}
+}
+bool Maze::search(string itemsearched) //More to be added elsewhere
+{
+	return Contents[currentroom].search(itemsearched);
+}
+
 class Adventurer
 {
 private:
 
 public:
 };
-
 class AdventureGame
 {
 private:
