@@ -274,7 +274,7 @@ void Maze::goDirection(string direction)
 	//this method sets the current room to the new room indicated by the supplied direction 
 	//if there is no door available or the door is locked, the current room doesn't change
 	int newroom;
-	cout << "YOU ATTEMPT TO GO" << direction << endl << endl;
+	cout << "YOU ATTEMPT TO GO " << direction << endl << endl;
 
 	for (int directioncount = 0; directioncount < int(directions.size()); directioncount++)
 	{
@@ -487,14 +487,54 @@ public:
 
 int main(void)
 {
-	Maze MyMaze;
+	Maze CurrentMaze;
 
 
-	MyMaze.loadDescriptionsFromFile();
-	MyMaze.loadConnectionsFromFile();
-	MyMaze.loadObjectsFromFile();
-	MyMaze.displayAllRooms();
-	MyMaze.displayAllConnections();
+	CurrentMaze.loadDescriptionsFromFile();
+	CurrentMaze.loadConnectionsFromFile();
+	CurrentMaze.loadObjectsFromFile();
+	CurrentMaze.displayAllRooms();
+	CurrentMaze.displayAllConnections();
+
+	//******************START OF UNIT TEST 1*********************
+	//Look, movement and non-liftable object
+	CurrentMaze.look(false);
+	CurrentMaze.removeItem("AXE"); //try to remove unmoveable axe
+	CurrentMaze.goDirection("NORTH");
+	//******************START OF UNIT TEST 2*********************
+	//try to grab item that is not present in room 
+	CurrentMaze.look(false);
+	CurrentMaze.removeItem("AXE"); // try to remove item when not present in room
+	//******************START OF UNIT TEST 3*********************
+	//Remove liftable object present in room
+	Object CurrentObject = CurrentMaze.removeItem("LAMP"); //get lamp
+	CurrentMaze.look(false);//check if item removed
+	CurrentMaze.goDirection("SOUTH");
+	CurrentMaze.look(false);
+	//******************START OF UNIT TEST 4*********************
+	//look in dark room
+	CurrentMaze.goDirection("EAST");
+	CurrentMaze.look(false);//try to see in dark room 
+	//******************START OF UNIT TEST 5*********************
+	//look in dark room
+	CurrentMaze.goDirection("SOUTH");//try to go in direction that doesn't exist
+	CurrentMaze.goDirection("OUT");	//try to go direction that doesn't exist 
+	//******************START OF UNIT TEST 6*********************
+	//Light lightable object and drop in dark room to see if it light it up
+	CurrentObject.light(); //light lightable object
+	CurrentMaze.addItem(CurrentObject);//Drop object in dark room 
+	CurrentMaze.look(false);//check to see if you can now see
+	CurrentMaze.goDirection("WEST");
+	CurrentMaze.look(false);
+	//******************START OF UNIT TEST 7*********************
+	//try to go in direction that has door, but is locked 
+	CurrentMaze.goDirection("OUT");//try to go in direction that is locked
+	CurrentMaze.goDirection("WEST"); //go to room with GOLD BAR under LARGE BED
+	//******************START OF UNIT TEST 8*********************
+	//try to remove + search item that is present, but not visible 
+	CurrentMaze.look(false); // should see bed and not bar
+	CurrentMaze.removeItem("GOLD BAR");//should fail because not visible 
+	CurrentMaze.search("GOLD BAR");//should fail because not visible
 
 	return 0;
 }
