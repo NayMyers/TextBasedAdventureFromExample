@@ -1,0 +1,42 @@
+0
+AXE
+a normal, single headed axe designed for chopping wood.
+FALSE
+FALSE
+TRUE
+10
+1
+LAMP
+a standard oil lamp with plenty of oil.
+TRUE
+TRUE
+TRUE
+0
+2
+DINING TABLE
+a large, oval dinning table large enough to sit 16 people.
+FALSE
+FALSE
+TRUE
+0
+3
+BRONZE KEY
+a large bronze key typically used to unlock/ lock large wooden doors.
+TRUE
+FALSE
+TRUE
+0
+4
+LARGE BED
+the bed appears to be a just a normal large bed. Maybe, you should look under it...
+FALSE
+FALSE
+TRUE
+0
+4
+GOLD BAR
+a gold bar that is probably worth quite a bit.
+TRUE
+FALSE
+FALSE
+0
