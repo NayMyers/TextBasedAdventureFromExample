@@ -29,7 +29,7 @@ private:
 	string _hiddenin = "";
 public:
 	Object(string description, string hiddendescription,
-		bool liftable, bool lightable, bool visible, int weapon,string hiddenin);
+		bool liftable, bool lightable, bool visible, int weapon, string hiddenin);
 	string description(void);
 	string hiddendescription(void);
 	bool liftable(void);
@@ -42,7 +42,7 @@ public:
 	string hiddenin(void);
 };
 Object::Object(string description, string hiddendescription,
-	bool liftable, bool lightable, bool visible, int weapon,string hiddenin)
+	bool liftable, bool lightable, bool visible, int weapon, string hiddenin = "")
 {
 	_description = description;
 	_hiddendescription = hiddendescription;
@@ -70,10 +70,6 @@ bool Object::light(void)
 }
 //---------------------
 //---------------------OBJECT SETTERS
-void Object::setVisible(bool visibility)
-{
-	_visible = visibility;
-}
 void Object::setVisible(bool visibility)
 {
 	_visible = visibility;
@@ -189,29 +185,70 @@ bool Room::isDark(void)
 }
 bool Room::hasLight(void)
 {
-	for (int inventorycount = 0; inventorycount < Inventory.size(); inventorycount++)//search through inventory
+	for (int inventorycount = 0; inventorycount < int(Inventory.size()); inventorycount++)//search through inventory
 	{
 		if (Inventory[inventorycount].lit()) return true;
 		// there is a lit object in the room	
 	}
 	return false;
 }
+bool Room::search(string itemsearched)
+{
+	//this method attempts to search a specified item in the current room and not the entire room 
+
+	bool founditemsearched = false; //rrecords if item being searched is in the room	
+	bool itemsearchednotvisible = false; //records if player is trying to search an item that isn't visible
+
+	cout << "YOU ATTEMPT TO SEARCH THE " << itemsearched << endl << endl;
+	for (int inventorycount = 0; inventorycount < int(Inventory.size()); inventorycount++)//search through inventory
+	{
+		if (Inventory[inventorycount].hiddenin() == itemsearched)
+		{
+			Inventory[inventorycount].setVisible(true);
+			cout << "YOU DISCOVER A " << Inventory[inventorycount].description() << "!" << endl << endl;
+			return true;
+		}
+
+		if (Inventory[inventorycount].description() == itemsearched)
+		{
+			founditemsearched = true; //item searched is in room
+			if (!Inventory[inventorycount].visible()) itemsearchednotvisible = true; //but it is not visible
+		}
+	}
+
+	if (!founditemsearched || itemsearchednotvisible) cout << "YOU CANNOT FIND A " << itemsearched << " ANYWHERE!";//item being searched wasn't in the room	
+	else cout << "YOU FIND NOTHING";
+
+	cout << endl << endl;
+	return false;
+}
 Object Room::removeItem(string description)
 {
-	Object BlankObject("", "", false, false, false, 0,"");
+	Object BlankObject("", "", false, false, false, 0, "");
 
 	for (int inventorycount = 0; inventorycount < int(Inventory.size()); inventorycount++)
 	{
 		if (Inventory[inventorycount].description() == description)
 		{
+			if (!Inventory[inventorycount].visible())break; //object not visible
+			if (!Inventory[inventorycount].liftable())
+			{
+				cout << "YOU CANNOT LIFT THE " << description << ": IT IS TOO HEAVY!" << endl << endl;
+				return BlankObject;
+			}
+			//object fount - remove from inventory 
 			BlankObject = Inventory[inventorycount];
 			Inventory.erase(Inventory.begin() + inventorycount);
 			break;
 		}
 	}
+	if (BlankObject.description() == "")cout << "THERE IS NO " << description << " HERE!";
+	else cout << "YOU REMOVE THE " << description << " FROM THE ROOM!";
+	
+	cout << endl << endl;
+
 	return BlankObject;
 }
-
 
 class Maze
 {
@@ -237,9 +274,9 @@ void Maze::goDirection(string direction)
 	//this method sets the current room to the new room indicated by the supplied direction 
 	//if there is no door available or the door is locked, the current room doesn't change
 	int newroom;
-	cout << "YOU ATTEMPT TO GO" << direction << endl << endl;	
+	cout << "YOU ATTEMPT TO GO" << direction << endl << endl;
 
-	for (int directioncount = 0; directioncount < directions.size(); directioncount++)
+	for (int directioncount = 0; directioncount < int(directions.size()); directioncount++)
 	{
 		if (directions[directioncount] == direction)
 		{
@@ -295,7 +332,7 @@ bool Maze::loadObjectsFromFile(void)
 	ifstream inputfile;
 	string text, metacharacter, description = "", hiddendescription = "";
 	bool liftable = false, lightable = false, visible = false;
-	int weapon = 0, roomnumber=0;
+	int weapon = 0, roomnumber = 0;
 
 	inputfile.open(ROOMOBJECTS); //*****OOOOO
 
@@ -365,12 +402,12 @@ void Maze::look(bool there_is_a_light) //EDITING NEED DOING
 	looksuccess = Contents[currentroom].display(there_is_a_light); /////??????????????????????????????
 	if (looksuccess)
 	{
-		cout << "YOU CAN GO:" << endl << endl;	
-		for (int directioncount = 0; directioncount < directions.size(); directioncount++)
+		cout << "YOU CAN GO:" << endl << endl;
+		for (int directioncount = 0; directioncount < int(directions.size()); directioncount++)
 		{
 			if (Connections[currentroom].Direction[directioncount].go() != NODOOR)
 			{
-				cout << directions[directioncount] << " "; 
+				cout << directions[directioncount] << " ";
 				exit = true;
 			}
 		}
@@ -383,7 +420,7 @@ void Maze::unlockDoor(string direction, string key)
 {
 	cout << "YOU ATTEMPT TO UNLOCK THE " << direction << " DOOR WITH THE " << key << endl << endl;
 
-	for (int directioncount = 0; directioncount < directions.size(); directioncount++)
+	for (int directioncount = 0; directioncount < int(directions.size()); directioncount++)
 	{
 		if (directions[directioncount] == direction)
 		{
@@ -452,7 +489,7 @@ int main(void)
 {
 	Maze MyMaze;
 
-	
+
 	MyMaze.loadDescriptionsFromFile();
 	MyMaze.loadConnectionsFromFile();
 	MyMaze.loadObjectsFromFile();
